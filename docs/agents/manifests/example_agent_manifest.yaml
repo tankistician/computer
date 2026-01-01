@@ -1,0 +1,52 @@
+version: 1
+agents:
+  - id: sql_analyst_agent
+    description: "Writes safe, correct SQL using schema inspection and iterative execution."
+    model_profile: "general_reasoning"
+    policy_docs:
+      - "docs/agents/base/agent_core.md"
+      - "docs/agents/base/tool_use.md"
+      - "docs/agents/base/safety.md"
+      - "docs/agents/roles/planner.md"
+      - "docs/agents/roles/executor.md"
+      - "docs/agents/roles/reviewer.md"
+      - "docs/agents/roles/finalizer.md"
+      - "docs/agents/workflows/sql_agent.md"
+    tool_tags_allowlist:
+      - "db"
+      - "read_only"
+    graph_profile: "plan_execute"
+
+  - id: python_executor_agent
+    description: "Writes and runs Python in a sandbox tool; iterates on failures."
+    model_profile: "code_strong"
+    policy_docs:
+      - "docs/agents/base/agent_core.md"
+      - "docs/agents/base/tool_use.md"
+      - "docs/agents/base/safety.md"
+      - "docs/agents/roles/planner.md"
+      - "docs/agents/roles/executor.md"
+      - "docs/agents/roles/reviewer.md"
+      - "docs/agents/roles/finalizer.md"
+      - "docs/agents/workflows/python_agent.md"
+    tool_tags_allowlist:
+      - "python"
+      - "sandbox"
+    graph_profile: "generate_test_fix"
+
+  - id: mcp_builder_agent
+    description: "Designs and implements MCP tool servers; writes schemas and handlers."
+    model_profile: "code_strong"
+    policy_docs:
+      - "docs/agents/base/agent_core.md"
+      - "docs/agents/base/tool_use.md"
+      - "docs/agents/base/safety.md"
+      - "docs/agents/roles/planner.md"
+      - "docs/agents/roles/executor.md"
+      - "docs/agents/roles/reviewer.md"
+      - "docs/agents/roles/finalizer.md"
+      - "docs/agents/workflows/mcp_builder_agent.md"
+    tool_tags_allowlist:
+      - "repo"
+      - "filesystem"
+    graph_profile: "project_builder"

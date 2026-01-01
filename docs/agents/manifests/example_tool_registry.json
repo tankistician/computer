@@ -1,0 +1,39 @@
+{
+  "mcp_servers": [
+    {
+      "name": "local-dev-tools",
+      "transport": "stdio",
+      "command": "node",
+      "args": ["mcp-server/dist/server.js"],
+      "tool_tags": ["local", "dev"]
+    },
+    {
+      "name": "shared-http-tools",
+      "transport": "http",
+      "url": "http://localhost:3000",
+      "tool_tags": ["http", "shared"]
+    }
+  ],
+  "tools": [
+    {
+      "name": "db.query",
+      "tags": ["db", "read_only"],
+      "description": "Execute a read-only SQL query against analytics DB."
+    },
+    {
+      "name": "db.schema",
+      "tags": ["db", "read_only"],
+      "description": "Fetch schema for a given table."
+    },
+    {
+      "name": "python.run",
+      "tags": ["python", "sandbox"],
+      "description": "Run Python code in a sandbox and return stdout/stderr."
+    },
+    {
+      "name": "http.request",
+      "tags": ["api"],
+      "description": "Make an HTTP request through a controlled gateway."
+    }
+  ]
+}

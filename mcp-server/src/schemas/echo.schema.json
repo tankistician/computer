@@ -1,0 +1,6 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Echo Tool Input",
+  "description": "Schema for the example echo tool. Accepts any JSON value.",
+  "type": ["object", "array", "string", "number", "boolean", "null"]
+}
