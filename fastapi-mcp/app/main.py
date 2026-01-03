@@ -7,6 +7,7 @@ performed only if the MCP app is available.
 from __future__ import annotations
 
 from fastapi import FastAPI
+from fastapi import FastAPI
 
 from . import mcp_server
 
@@ -16,6 +17,102 @@ app = FastAPI(title="fastapi-mcp example")
 @app.get("/hello")
 def hello() -> dict:
     return {"message": "hello from fastapi-mcp (skeleton)"}
+
+
+@app.get("/")
+def index() -> dict:
+    """Root index with helpful links."""
+    return {
+        "message": "fastapi-mcp",
+        "links": {
+            "hello": "/hello",
+            "openapi": "/openapi.json",
+            "docs": "/docs",
+            "tools": "/tools",
+        },
+    }
+
+
+@app.get("/tools")
+def list_tools() -> dict:
+    """List available Python callables in `app.mcp_server` and MCP status.
+
+    This endpoint is useful during development to see which tool functions
+    are present even when FastMCP is not installed. It does not reflect the
+    MCP registry exactly but helps discover available helpers.
+    """
+    from . import mcp_server
+    tool_names = []
+    for name in ("add", "normalize_name", "echo", "health", "code_review_prompt"):
+        if hasattr(mcp_server, name):
+            tool_names.append(name)
+
+    return {"mcp_present": mcp is not None, "python_callables": tool_names}
+
+
+@app.get("/mcp/tools", tags=["mcp"])
+async def list_mcp_tools():
+    """List MCP tools using FastMCP HTTP client when available, else fallback
+    to in-process discovery from `app.mcp_server`.
+    """
+    # First: discover in-process functions so we can always return them if
+    # the MCP client path fails or returns empty. This mirrors the `/tools`
+    # endpoint behavior and is useful during development.
+    import inspect
+
+    inproc_tools = []
+    mod = mcp_server
+    candidate_names = ("add", "normalize_name", "echo", "health", "code_review_prompt")
+    inproc_debug = []
+    for name in candidate_names:
+        has = hasattr(mod, name)
+        obj = getattr(mod, name) if has else None
+        is_callable = callable(obj) if has else False
+        try:
+            sig = str(inspect.signature(obj)) if is_callable else None
+        except (ValueError, TypeError):
+            sig = None
+        doc = inspect.getdoc(obj) or "" if has else ""
+        inproc_tools.append({"name": name, "description": doc, "inputSchema": sig, "meta": None} if is_callable else {})
+        inproc_debug.append({
+            "name": name,
+            "has_attr": has,
+            "callable": is_callable,
+            "type": type(obj).__name__ if has else None,
+            "obj_name": getattr(obj, "__name__", None),
+        })
+
+    # Next: try FastMCP client discovery (prefer this if it returns tools).
+    try:
+        from fastmcp.client import Client  # type: ignore
+    except Exception:
+        Client = None  # type: ignore
+
+    if Client is not None:
+        try:
+            async with Client("http://127.0.0.1:8000/mcp") as client:
+                tools = await client.list_tools()
+                result = []
+                for t in tools:
+                    result.append({
+                        "name": getattr(t, "name", None),
+                        "description": getattr(t, "description", None),
+                        "inputSchema": getattr(t, "inputSchema", None),
+                        "meta": getattr(t, "meta", None),
+                    })
+                if result:
+                    return {"source": "fastmcp_client", "tools": result}
+        except Exception:
+            # If client call fails, fall through to returning in-process tools
+            pass
+
+    # Return the in-process discovery (may be empty if nothing is exposed)
+    return {
+        "source": "inprocess",
+        "mcp_present": mcp is not None,
+        "tools": inproc_tools,
+        "inproc_debug": inproc_debug,
+    }
 
 if mcp is not None:
     try:

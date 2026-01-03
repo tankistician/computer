@@ -56,11 +56,23 @@ def _impl_code_review_prompt(code: str) -> str:
     )
 
 
+def _impl_echo(input_value: Any) -> dict[str, Any]:
+    """Echo tool: returns the input back with a message."""
+    start = time.time()
+    return {
+        "ok": True,
+        "data": {"echoed": input_value},
+        "meta": _meta(start),
+        "message": "echo tool received input",
+    }
+
+
 # Public API points to implementations so tests can import and call them.
 add = _impl_add
 normalize_name = _impl_normalize_name
 health = _impl_health
 code_review_prompt = _impl_code_review_prompt
+echo = _impl_echo
 
 
 # If FastMCP is available, register decorated wrappers so the tools appear
@@ -81,3 +93,7 @@ if mcp is not None:
     @mcp.prompt(title="Code Review")
     def code_review_prompt(code: str) -> str:
         return _impl_code_review_prompt(code)
+
+    @mcp.tool
+    def echo(input_value: Any) -> dict[str, Any]:
+        return _impl_echo(input_value)
