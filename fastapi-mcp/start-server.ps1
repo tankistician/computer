@@ -20,7 +20,7 @@ function Run-Command {
     param($exe, $args)
     Write-Output "Running: $exe $args"
     & $exe $args
-    if ($LASTEXITCODE -ne 0) {
+    if ($LASTEXITCODE -ne 0) {git
         throw "Command failed: $exe $args (exit $LASTEXITCODE)"
     }
 }

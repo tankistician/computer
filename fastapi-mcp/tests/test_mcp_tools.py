@@ -1,13 +1,49 @@
 import importlib.util
 import pathlib
+import sys
+import types
+from typing import Any
+
+
+def _fastmcp_stub_module():
+    stub = types.ModuleType("fastmcp")
+
+    class DummyFastMCP:
+        def __init__(self, name: str):
+            self.name = name
+
+        def tool(self, func):
+            return func
+
+        def resource(self, _):
+            def decorator(func):
+                return func
+            return decorator
+
+        def prompt(self, *args: Any, **kwargs: Any):
+            def decorator(func):
+                return func
+            return decorator
+
+    stub.FastMCP = DummyFastMCP
+    return stub
 
 
 def load_mcp_server_module():
     path = pathlib.Path(__file__).parent.parent / "app" / "mcp_server.py"
-    spec = importlib.util.spec_from_file_location("mcp_server", str(path))
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    original_fastmcp = sys.modules.get("fastmcp")
+    stub = _fastmcp_stub_module()
+    sys.modules["fastmcp"] = stub
+    try:
+        spec = importlib.util.spec_from_file_location("mcp_server", str(path))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+    finally:
+        if original_fastmcp is not None:
+            sys.modules["fastmcp"] = original_fastmcp
+        else:
+            sys.modules.pop("fastmcp", None)
 
 
 def test_add():

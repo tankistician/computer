@@ -60,7 +60,6 @@ async def list_mcp_tools():
     # endpoint behavior and is useful during development.
     import inspect
 
-    inproc_tools = []
     mod = mcp_server
     candidate_names = ("add", "normalize_name", "echo", "health", "code_review_prompt")
     inproc_debug = []
@@ -72,14 +71,13 @@ async def list_mcp_tools():
             sig = str(inspect.signature(obj)) if is_callable else None
         except (ValueError, TypeError):
             sig = None
-        doc = inspect.getdoc(obj) or "" if has else ""
-        inproc_tools.append({"name": name, "description": doc, "inputSchema": sig, "meta": None} if is_callable else {})
         inproc_debug.append({
             "name": name,
             "has_attr": has,
             "callable": is_callable,
             "type": type(obj).__name__ if has else None,
             "obj_name": getattr(obj, "__name__", None),
+            "signature": sig,
         })
 
     # Next: try FastMCP client discovery (prefer this if it returns tools).
@@ -92,27 +90,14 @@ async def list_mcp_tools():
         try:
             async with Client("http://127.0.0.1:8000/mcp") as client:
                 tools = await client.list_tools()
-                result = []
-                for t in tools:
-                    result.append({
-                        "name": getattr(t, "name", None),
-                        "description": getattr(t, "description", None),
-                        "inputSchema": getattr(t, "inputSchema", None),
-                        "meta": getattr(t, "meta", None),
-                    })
-                if result:
-                    return {"source": "fastmcp_client", "tools": result}
+                # Still return local debug info only (per request to drop tools)
+                return {"source": "fastmcp_client", "inproc_debug": inproc_debug}
         except Exception:
             # If client call fails, fall through to returning in-process tools
             pass
 
-    # Return the in-process discovery (may be empty if nothing is exposed)
-    return {
-        "source": "inprocess",
-        "mcp_present": mcp is not None,
-        "tools": inproc_tools,
-        "inproc_debug": inproc_debug,
-    }
+    # Return the in-process debug info (requested: only inproc_debug)
+    return {"source": "inprocess", "mcp_present": mcp is not None, "inproc_debug": inproc_debug}
 
 if mcp is not None:
     try:
