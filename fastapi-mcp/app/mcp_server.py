@@ -21,6 +21,15 @@ mcp = None
 if FastMCP is not None:
     mcp = FastMCP("fastapi-mcp")
 
+# Import tool modules even when FastMCP is missing so their pure Python
+# implementations are available for in-process inspection and tests.
+from .tools import jira_tool, gov_policy_tool  # type: ignore
+
+# Expose tool callables at module level so `app.main` can discover them
+# even when FastMCP is not installed.
+jira_search_closest = getattr(jira_tool, "jira_search_closest", None)
+gov_policy_search = getattr(gov_policy_tool, "gov_policy_search", None)
+
 
 def _meta(start: float) -> dict[str, Any]:
     return {
@@ -97,3 +106,7 @@ if mcp is not None:
     @mcp.tool
     def echo(input_value: Any) -> dict[str, Any]:
         return _impl_echo(input_value)
+
+    # Register FastMCP-decorated wrappers so tools appear in the MCP server.
+    jira_tool.register_mcp_instance(mcp)
+    gov_policy_tool.register_mcp_instance(mcp)

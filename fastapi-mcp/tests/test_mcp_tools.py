@@ -1,7 +1,9 @@
+import importlib
 import importlib.util
 import pathlib
 import sys
 import types
+from typing import Any
 from typing import Any
 
 
@@ -30,14 +32,17 @@ def _fastmcp_stub_module():
 
 
 def load_mcp_server_module():
-    path = pathlib.Path(__file__).parent.parent / "app" / "mcp_server.py"
+    root = pathlib.Path(__file__).parent.parent.resolve()
+    if str(root) not in sys.path:
+        sys.path.insert(0, str(root))
     original_fastmcp = sys.modules.get("fastmcp")
     stub = _fastmcp_stub_module()
     sys.modules["fastmcp"] = stub
+    sys.modules.pop("app.mcp_server", None)
+    sys.modules.pop("app.tools.jira_tool", None)
     try:
-        spec = importlib.util.spec_from_file_location("mcp_server", str(path))
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        module = importlib.import_module("app.mcp_server")
+        importlib.reload(module)
         return module
     finally:
         if original_fastmcp is not None:

@@ -1,0 +1,8 @@
+﻿{
+  "query": "education",
+  "pageSize": 10,
+  "offsetMark": "*",
+  "sorts": [ { "field": "relevancy", "sortOrder": "DESC" } ],
+  "historical": true,
+  "resultLevel": "default"
+}

@@ -1,0 +1,91 @@
+== Info: Host api.govinfo.gov:443 was resolved.
+== Info: IPv6: 2600:1f12:18a:7d00:959b:576b:e36e:ec04, 2600:1f12:18a:7d01:d19e:5f23:b54f:922f
+== Info: IPv4: 160.1.99.132, 56.137.87.142
+== Info:   Trying [2600:1f12:18a:7d00:959b:576b:e36e:ec04]:443...
+== Info: connect to 2600:1f12:18a:7d00:959b:576b:e36e:ec04 port 443 from :: port 50907 failed: Network unreachable
+== Info:   Trying [2600:1f12:18a:7d01:d19e:5f23:b54f:922f]:443...
+== Info: connect to 2600:1f12:18a:7d01:d19e:5f23:b54f:922f port 443 from :: port 50908 failed: Network unreachable
+== Info:   Trying 160.1.99.132:443...
+== Info: schannel: disabled automatic use of client certificate
+== Info: ALPN: curl offers http/1.1
+== Info: ALPN: server accepted http/1.1
+== Info: Connected to api.govinfo.gov (160.1.99.132) port 443
+== Info: using HTTP/1.x
+=> Send header, 201 bytes (0xc9)
+0000: POST /search?api_key=URhW6TVTwU9l8SaBYHjsnRiadiX0wUM3ooVTd51w HT
+0040: TP/1.1
+0048: Host: api.govinfo.gov
+005f: User-Agent: curl/8.13.0
+0078: accept: application/json
+0092: Content-Type: application/json
+00b2: Content-Length: 126
+00c7: 
+=> Send data, 126 bytes (0x7e)
+0000: { query:education, pageSize:10, offsetMark:*, sorts:[{field:rele
+0040: vancy,sortOrder:DESC}], historical:true, resultLevel:default }
+== Info: upload completely sent off: 126 bytes
+<= Recv header, 36 bytes (0x24)
+0000: HTTP/1.1 500 Internal Server Error
+<= Recv header, 37 bytes (0x25)
+0000: Date: Sun, 04 Jan 2026 17:29:42 GMT
+<= Recv header, 32 bytes (0x20)
+0000: Content-Type: application/json
+<= Recv header, 28 bytes (0x1c)
+0000: Transfer-Encoding: chunked
+<= Recv header, 24 bytes (0x18)
+0000: Connection: keep-alive
+<= Recv header, 8 bytes (0x8)
+0000: Age: 0
+<= Recv header, 1279 bytes (0x4ff)
+0000: Content-Security-Policy: default-src 'self'  http://www.govinfo.
+0040: gov  https://analytics.govinfo.gov https://stackpath.bootstrapcd
+0080: n.com https://maxcdn.bootstrapcdn.com; frame-ancestors 'self'; s
+00c0: cript-src 'unsafe-inline' 'unsafe-eval' 'self' http://www.govinf
+0100: o.gov  https://stackpath.bootstrapcdn.com https://maxcdn.bootstr
+0140: apcdn.com https://www.google.com/recaptcha https://recaptcha.goo
+0180: gle.com/recaptcha; object-src 'unsafe-inline' 'self' http://www.
+01c0: govinfo.gov ; style-src 'unsafe-inline' 'self' http://www.govinf
+0200: o.gov https://maxcdn.bootstrapcdn.com https://stackpath.bootstra
+0240: pcdn.com https://fonts.googleapis.com https://www.google.com/rec
+0280: aptcha https://recaptcha.google.com/recaptcha; img-src 'unsafe-i
+02c0: nline' 'self' http://www.govinfo.gov  https://stackpath.bootstra
+0300: pcdn.com https://maxcdn.bootstrapcdn.com https://analytics.govin
+0340: fo.gov data:; font-src 'unsafe-inline' 'self' http://www.govinfo
+0380: .gov https://stackpath.bootstrapcdn.com https://maxcdn.bootstrap
+03c0: cdn.com https://fonts.gstatic.com https://fonts.googleapis.com; 
+0400: connect-src 'self' http://www.govinfo.gov https://analytics.govi
+0440: nfo.gov; frame-src 'self' http://www.govinfo.gov  https://stackp
+0480: ath.bootstrapcdn.com https://maxcdn.bootstrapcdn.com https://www
+04c0: .google.com/recaptcha https://recaptcha.google.com/recaptcha;
+<= Recv header, 73 bytes (0x49)
+0000: Strict-Transport-Security: max-age=31536000; includeSubDomains; 
+0040: preload
+<= Recv header, 75 bytes (0x4b)
+0000: Vary: Origin,Access-Control-Request-Method,Access-Control-Reques
+0040: t-Headers
+<= Recv header, 60 bytes (0x3c)
+0000: Via: https/1.1 api-umbrella (ApacheTrafficServer [cMs f ])
+<= Recv header, 49 bytes (0x31)
+0000: X-Api-Umbrella-Request-Id: crh87ca7thnruquk2fp0
+<= Recv header, 15 bytes (0xf)
+0000: X-Cache: MISS
+<= Recv header, 33 bytes (0x21)
+0000: X-Content-Type-Options: nosniff
+<= Recv header, 26 bytes (0x1a)
+0000: X-Ratelimit-Limit: 36000
+<= Recv header, 30 bytes (0x1e)
+0000: X-Ratelimit-Remaining: 35986
+<= Recv header, 57 bytes (0x39)
+0000: X-Vcap-Request-Id: cce53762-f6a2-43f9-7011-ecb148344f5b
+<= Recv header, 23 bytes (0x17)
+0000: X-Frame-Options: DENY
+<= Recv header, 2 bytes (0x2)
+0000: 
+<= Recv data, 98 bytes (0x62)
+0000: 5c
+0004: {"message":"Oops, Something went wrong, Please contact govinfo t
+0044: eam for further assistance"}
+<= Recv data, 5 bytes (0x5)
+0000: 0
+0003: 
+== Info: Connection #0 to host api.govinfo.gov left intact

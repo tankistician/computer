@@ -1,5 +1,5 @@
 import asyncio
-import importlib.util
+import importlib
 import os
 import sys
 import types
@@ -7,6 +7,11 @@ from pathlib import Path
 from typing import Any, Dict
 
 import pytest
+
+
+APP_ROOT = Path(__file__).resolve().parents[1]
+if str(APP_ROOT) not in sys.path:
+    sys.path.insert(0, str(APP_ROOT))
 
 
 def _fastmcp_stub_module() -> types.ModuleType:
@@ -34,15 +39,14 @@ def _fastmcp_stub_module() -> types.ModuleType:
 
 
 def load_jira_tool_module() -> Any:
-    path = Path(__file__).parent.parent / "app" / "tools" / "jira_tool.py"
     original_fastmcp = sys.modules.get("fastmcp")
     stub = _fastmcp_stub_module()
     sys.modules["fastmcp"] = stub
+    sys.modules.pop("app.mcp_server", None)
+    sys.modules.pop("app.tools.jira_tool", None)
     try:
-        spec = importlib.util.spec_from_file_location("jira_tool", str(path))
-        module = importlib.util.module_from_spec(spec)
-        assert spec.loader
-        spec.loader.exec_module(module)
+        module = importlib.import_module("app.tools.jira_tool")
+        importlib.reload(module)
         return module
     finally:
         if original_fastmcp is not None:

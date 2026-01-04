@@ -7,7 +7,6 @@ performed only if the MCP app is available.
 from __future__ import annotations
 
 from fastapi import FastAPI
-from fastapi import FastAPI
 
 from . import mcp_server
 
@@ -28,26 +27,11 @@ def index() -> dict:
             "hello": "/hello",
             "openapi": "/openapi.json",
             "docs": "/docs",
-            "tools": "/tools",
         },
     }
 
 
-@app.get("/tools")
-def list_tools() -> dict:
-    """List available Python callables in `app.mcp_server` and MCP status.
 
-    This endpoint is useful during development to see which tool functions
-    are present even when FastMCP is not installed. It does not reflect the
-    MCP registry exactly but helps discover available helpers.
-    """
-    from . import mcp_server
-    tool_names = []
-    for name in ("add", "normalize_name", "echo", "health", "code_review_prompt"):
-        if hasattr(mcp_server, name):
-            tool_names.append(name)
-
-    return {"mcp_present": mcp is not None, "python_callables": tool_names}
 
 
 @app.get("/mcp/tools", tags=["mcp"])
@@ -61,7 +45,15 @@ async def list_mcp_tools():
     import inspect
 
     mod = mcp_server
-    candidate_names = ("add", "normalize_name", "echo", "health", "code_review_prompt")
+    candidate_names = (
+        "add",
+        "normalize_name",
+        "echo",
+        "health",
+        "code_review_prompt",
+        "jira_search_closest",
+        "gov_policy_search",
+    )
     inproc_debug = []
     for name in candidate_names:
         has = hasattr(mod, name)
