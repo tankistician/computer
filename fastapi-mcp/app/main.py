@@ -53,6 +53,7 @@ async def list_mcp_tools():
         "code_review_prompt",
         "jira_search_closest",
         "gov_policy_search",
+        "gov_policy_summary",
     )
     inproc_debug = []
     for name in candidate_names:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import importlib
 import sys
@@ -43,8 +45,23 @@ def _fastmcp_stub_module() -> types.ModuleType:
     stub = types.ModuleType("fastmcp")
 
     class DummyFastMCP:
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
+            pass
+
         def tool(self, func: Any) -> Any:
             return func
+
+        def resource(self, *args: Any, **kwargs: Any) -> Any:
+            def decorator(func: Any) -> Any:
+                return func
+
+            return decorator
+
+        def prompt(self, *args: Any, **kwargs: Any) -> Any:
+            def decorator(func: Any) -> Any:
+                return func
+
+            return decorator
 
     stub.FastMCP = DummyFastMCP
     return stub
@@ -54,9 +71,8 @@ def load_tool_module() -> Any:
     original_fastmcp = sys.modules.get("fastmcp")
     stub = _fastmcp_stub_module()
     sys.modules["fastmcp"] = stub
-    sys.modules.pop("app.tools.gov_policy_tool", None)
     try:
-        module = importlib.import_module("app.tools.gov_policy_tool")
+        module = importlib.import_module("app.mcp_server")
         importlib.reload(module)
         return module
     finally:
@@ -66,30 +82,31 @@ def load_tool_module() -> Any:
             sys.modules.pop("fastmcp", None)
 
 
-gov_policy_tool = load_tool_module()
+gov_policy_server = load_tool_module()
 
 
-def _patch_handlers(module: Any, results: List[Dict[str, Any]]) -> None:
+def _patch_handlers(results: List[Dict[str, Any]]) -> None:
     async def _stub(*args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return results
 
-    module._call_federal_register = _stub
-    module._call_govinfo = _stub
+    import app.tools.policy_search_federal_register as fr_mod
+    import app.tools.policy_search_govinfo as gi_mod
+
+    fr_mod._call_federal_register = _stub
+    gi_mod._call_govinfo = _stub
 
 
 def test_empty_query() -> None:
-    res = asyncio.run(gov_policy_tool.gov_policy_search(query="", sources=["federal_register"]))
+    res = asyncio.run(gov_policy_server.gov_policy_search(query="", sources=["federal_register"]))
     assert not res["ok"]
     assert res["error"]["code"] == "BAD_INPUT"
 
 
 def test_aggregated_results(monkeypatch: pytest.MonkeyPatch) -> None:
-    module = gov_policy_tool
     dummy = [{"title": "Title", "publication_date": "2025-01-01", "abstract": "desc"}]
-    _patch_handlers(module, dummy)
-    monkeypatch.setattr(module, "SOURCE_HANDLERS", {"federal_register": module._call_federal_register})
+    _patch_handlers(dummy)
 
-    res = asyncio.run(module.gov_policy_search(query="policy", sources=["federal_register"], limit=2))
+    res = asyncio.run(gov_policy_server.gov_policy_search(query="policy", sources=["federal_register"], limit=2))
     assert res["ok"]
     data = res["data"]
     assert data["query"] == "policy"
@@ -101,7 +118,7 @@ def test_aggregated_results(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_gov_policy_search_live() -> None:
     # Run a short live query against the govinfo/federal_register endpoints.
     # This test requires a valid GOVINFO_API_KEY in the repo .env or environment.
-    res = asyncio.run(gov_policy_tool.gov_policy_search(query="education", sources=["federal_register", "govinfo"], limit=2))
+    res = asyncio.run(gov_policy_server.gov_policy_search(query="education", sources=["federal_register", "govinfo"], limit=2))
     assert res["ok"] is True
     data = res.get("data", {})
     assert "results" in data
