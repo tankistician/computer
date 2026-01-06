@@ -122,3 +122,7 @@ def test_gov_policy_search_live() -> None:
     assert res["ok"] is True
     data = res.get("data", {})
     assert "results" in data
+
+
+def test_govinfo_api_key_exists() -> None:
+    assert GOVINFO_ENV_AVAILABLE or os.environ.get("GOVINFO_API_KEY"), "Set GOVINFO_API_KEY for policy tests"

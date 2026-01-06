@@ -14,16 +14,39 @@ version and adding authentication/error handling/assertions.
 """
 import asyncio
 import json
+import os
 import sys
 import argparse
+from pathlib import Path
+from typing import Any
+
+
+def load_env_from_repo_root() -> None:
+    env_path = Path(__file__).resolve().parents[1].parent / ".env"
+    if not env_path.is_file():
+        return
+    for line in env_path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip("'\"")
+        if not key or not value:
+            continue
+        os.environ.setdefault(key, value)
+
+
+load_env_from_repo_root()
 
 
 def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--url", default="http://127.0.0.1:8000/mcp", help="Base URL to the MCP HTTP app")
     p.add_argument("--tool", default="gov_policy_search")
-    p.add_argument("--query", default="education")
+    p.add_argument("--query", default="AI regulation")
     p.add_argument("--limit", type=int, default=3)
+    p.add_argument("--summary-count", type=int, default=2, help="How many summaries to retrieve from GovInfo granules")
     return p.parse_args()
 
 
@@ -36,7 +59,6 @@ async def main():
         raise
 
     async with Client(args.url) as client:
-        # Best-effort: try to list tools (method may vary by fastmcp version)
         tools = None
         if hasattr(client, "list_tools"):
             try:
@@ -46,8 +68,6 @@ async def main():
 
         print("Discovered tools:", tools)
 
-        # Try to invoke the tool. Different fastmcp versions expose different APIs;
-        # try a few common names (call, invoke, run_tool) so the script is robust.
         call_fn = None
         for name in ("call", "invoke", "run_tool", "call_tool", "invoke_tool"):
             if hasattr(client, name):
@@ -58,15 +78,40 @@ async def main():
             print("Could not find a call/invoke method on Client instance; check fastmcp API.", file=sys.stderr)
             sys.exit(2)
 
-        # Call the tool with keyword args if supported; otherwise call positional.
-        kwargs = {"query": args.query, "limit": args.limit, "sources": ["govinfo", "federal_register"]}
-        try:
-            result = await call_fn(args.tool, **kwargs)
-        except TypeError:
-            # fallback: positional (tool name first)
-            result = await call_fn(args.tool, kwargs)
+        async def invoke(tool_name: str, **kwargs: Any) -> Any:
+            try:
+                return await call_fn(tool_name, **kwargs)
+            except TypeError:
+                return await call_fn(tool_name, kwargs)
 
+        kwargs = {"query": args.query, "limit": args.limit, "sources": ["govinfo"]}
+        result = await invoke(args.tool, **kwargs)
         print(json.dumps(result, indent=2))
+
+        if args.summary_count <= 0:
+            return
+
+        granule_res = await invoke("govinfo_search_granules", query=args.query, page_size=max(args.limit, args.summary_count))
+        print("\nGovInfo granule search result:", json.dumps(granule_res, indent=2))
+        if not granule_res.get("ok"):
+            return
+
+        items = (granule_res.get("data", {}).get("items", []) or [])[: args.summary_count]
+        for idx, item in enumerate(items, start=1):
+            package_id = item.get("package_id")
+            granule_id = item.get("granule_id")
+            title = item.get("title")
+            print(f"\nSummary {idx}: {package_id}/{granule_id} – {title}")
+            if not package_id or not granule_id:
+                print("Missing package_id/granule_id; skipping summary")
+                continue
+            summary = await invoke(
+                "govinfo_download_granule_text",
+                package_id=package_id,
+                granule_id=granule_id,
+                fmt="htm",
+            )
+            print(json.dumps(summary, indent=2))
 
 
 if __name__ == "__main__":

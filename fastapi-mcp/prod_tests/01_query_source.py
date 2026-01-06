@@ -8,8 +8,26 @@ Run this from the `fastapi-mcp/prod_tests` folder with the venv active.
 """
 import os
 import json
-import httpx
 import asyncio
+from pathlib import Path
+
+import httpx
+
+
+def load_env_from_repo_root() -> None:
+    env_path = Path(__file__).resolve().parents[1].parent / ".env"
+    if not env_path.is_file():
+        return
+    for line in env_path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip("'\"")
+        if not key or not value:
+            continue
+        os.environ.setdefault(key, value)
 
 
 async def call_govinfo():
@@ -29,20 +47,9 @@ async def call_govinfo():
             print(r.text)
 
 
-async def call_federal_register():
-    params = {"per_page": 2, "conditions[any]": "education"}
-    async with httpx.AsyncClient(timeout=30) as client:
-        r = await client.get("https://www.federalregister.gov/api/v1/documents", params=params)
-        print(r.status_code)
-        try:
-            print(json.dumps(r.json(), indent=2))
-        except Exception:
-            print(r.text)
-
-
 async def main():
+    load_env_from_repo_root()
     await call_govinfo()
-    await call_federal_register()
 
 
 if __name__ == "__main__":

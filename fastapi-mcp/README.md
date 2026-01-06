@@ -113,6 +113,7 @@ Government policy research tool
 - **API usage**: the tool reads `GOVINFO_API_KEY` (optional) and hits `https://www.federalregister.gov/api/v1/documents` plus the GovInfo search endpoint. Results are normalized into `{source,data}` items with publication dates.
 - **Publishing**: register the Federal Register and govinfo search helpers (`policy_search_federal_register.register_mcp_instance(mcp)` and `policy_search_govinfo.register_mcp_instance(mcp)`) in `app/mcp_server.py` so `/mcp/tools` lists them alongside the Jira search tool.
 - **Summarizer**: `gov_policy_summary` consumes the same data, produces a short narrative summary (`summary`, `source_counts`, `total_results`, `top_hits`) for the query, and is registered via `gov_policy_summary_tool.register_mcp_instance(mcp)` so it is discoverable together with the original search tool.
+- **Federal Register detail**: for citations that require the original document, `federal_register_summary_tool.federal_register_get_document_summary` fetches the Federal Register payload plus optional HTML/text content, and `federal_register_summary_tool.register_mcp_instance(mcp)` registers it alongside the other helpers.
 
 Testing MCP tools
 

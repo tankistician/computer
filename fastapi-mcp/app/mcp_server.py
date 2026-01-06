@@ -23,7 +23,13 @@ if FastMCP is not None:
 
 # Import tool modules even when FastMCP is missing so their pure Python
 # implementations are available for in-process inspection and tests.
-from .tools import jira_tool, policy_search_govinfo, policy_search_federal_register, gov_policy_summary_tool  # type: ignore
+from .tools import (
+    federal_register_summary_tool,
+    gov_policy_summary_tool,
+    jira_tool,
+    policy_search_federal_register,
+    policy_search_govinfo,
+)  # type: ignore
 
 # Expose tool callables at module level so `app.main` can discover them
 # even when FastMCP is not installed.
@@ -141,3 +147,4 @@ if mcp is not None:
     policy_search_federal_register.register_mcp_instance(mcp)
     policy_search_govinfo.register_mcp_instance(mcp)
     gov_policy_summary_tool.register_mcp_instance(mcp)
+    federal_register_summary_tool.register_mcp_instance(mcp)
