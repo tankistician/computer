@@ -27,6 +27,8 @@ cd C:\Users\fbpol\Documents\ML_Projects\computer\fastapi-mcp
 .\.venv\Scripts\Activate.ps1
 ```
 
+`start-server.ps1` now bootstraps the shared workspace `.venv` (instead of creating a nested one), so always activate that same `.venv` before running the prod test scripts or `pytest` so every helper shares the exact same dependencies.
+
 Scripted helper (same behavior, foreground)
 
 ```powershell
