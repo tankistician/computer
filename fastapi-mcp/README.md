@@ -10,6 +10,9 @@ Prerequisites:
 - Docker Desktop
 - `make`
 
+Static configuration
+- The Docker service reads `.env` from the repo root; we also load it inside `app/main.py` so `GOVINFO_API_KEY` and other credentials are available without extra commands.
+
 From the repo root:
 
 ```bash

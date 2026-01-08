@@ -60,8 +60,8 @@ async def _fetch_granule_summary(package_id: str, granule_id: str, fmt: Literal[
             status = exc.response.status_code if exc.response is not None else None
             return {"ok": False, "error": {"code": "UPSTREAM_ERROR", "message": f"HTTP {status}"}, "meta": _meta(start)}
 
-        summary = resp.json()
-        download = summary.get("download") or {}
+        summary_payload = resp.json()
+        download = summary_payload.get("download") or {}
         download_url = _extract_download_url(download, fmt)
 
         if not download_url:
@@ -75,7 +75,33 @@ async def _fetch_granule_summary(package_id: str, granule_id: str, fmt: Literal[
             content = content_resp.text
             content_type = content_resp.headers.get("Content-Type", "")
 
-    return {"ok": True, "data": {"package_id": package_id, "granule_id": granule_id, "format": fmt, "summary_url": summary_url, "download_url": download_url, "content_type": content_type, "content": content, "summary": summary}, "meta": _meta(start)}
+    return {
+        "ok": True,
+        "data": {
+            "package_id": package_id,
+            "granule_id": granule_id,
+            "format": fmt,
+            "summary_url": summary_url,
+            "download_url": download_url,
+            "content_type": content_type,
+            "content": content,
+            "summary": summary_payload.get("summary"),
+            "collection_name": summary_payload.get("collectionName"),
+            "collection_code": summary_payload.get("collectionCode"),
+            "package_link": summary_payload.get("packageLink"),
+            "details_link": summary_payload.get("detailsLink"),
+            "agencies": summary_payload.get("agencies"),
+            "billing_code": summary_payload.get("billingCode"),
+            "doc_class": summary_payload.get("docClass"),
+            "granule_class": summary_payload.get("granuleClass"),
+            "related_link": summary_payload.get("relatedLink"),
+            "category": summary_payload.get("category"),
+            "granules_link": summary_payload.get("granulesLink"),
+            "download": summary_payload.get("download"),
+            "record": summary_payload,
+        },
+        "meta": _meta(start),
+    }
  
 # GovInfo-specific export
 govinfo_fetch_granule_summary = _fetch_granule_summary

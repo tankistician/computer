@@ -23,9 +23,36 @@ Process (recommended)
 3. Start the FastAPI server (mounts MCP at `/mcp`) and run the HTTP invocation script.
 4. Convert the successful manual checks into a guarded pytest integration test and add to `tests/integration/`.
 
-Policy search + summary flow
+- Policy search + summary flow
 - `03_invoke_tool_inproc.py` now defaults to `query="AI regulation"` and pipes the top-of-page GovInfo search into `govinfo_search_granules` + `govinfo_download_granule_text`, printing the first two granule summaries. Pass `--summary-count` if you want more or fewer summaries.
 - `04_invoke_tool_http.py` mirrors that behavior over the MCP HTTP API: it invokes `gov_policy_search`, then `govinfo_search_granules`, and finally `govinfo_download_granule_text` for the first two hits so you can inspect the summary payload and HTML/text content.
+-
+- **GovInfo policy search (curl)**
+- Run the MCP server via `make up`, then hit the proxy `/mcp/tool` endpoint to exercise `gov_policy_search`:
+-
+- ```bash
+- curl -sS -X POST http://127.0.0.1:8000/mcp/tool \
+-   -H "Content-Type: application/json" \
+-   -d '{
+-     "tool": "gov_policy_search",
+-     "input": {
+-       "query": "AI regulation",
+ -      "sources": ["govinfo"],
+-       "limit": 3
+-     }
+-   }'
+- ```
+
+curl -sS -X POST http://127.0.0.1:8000/mcp/tool \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tool": "gov_policy_search",
+    "input": {
+      "query": "AI regulation",
+      "sources": ["govinfo"],
+      "limit": 3
+    }
+  }'
 
 Environment notes
 - Scripts assume you have a Python venv activated and `PYTHONPATH` set to the `fastapi-mcp` package for in-process calls.

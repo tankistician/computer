@@ -7,12 +7,34 @@ performed only if the MCP app is available.
 from __future__ import annotations
 
 import asyncio
+import os
+from pathlib import Path
+
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from . import mcp_server
+
+
+def load_repo_env() -> None:
+    root = Path(__file__).resolve().parents[1]
+    env_path = root / ".env"
+    if not env_path.is_file():
+        return
+    for line in env_path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip("'\"")
+        if key and value and key not in os.environ:
+            os.environ[key] = value
+
+
+load_repo_env()
 
 mcp = getattr(mcp_server, "mcp", None)
 app = FastAPI(title="fastapi-mcp example")

@@ -43,7 +43,7 @@ async def gov_policy_search(query: str, sources: list[str] | None = None, start_
     if not query or not query.strip():
         return {"ok": False, "error": {"code": "BAD_INPUT", "message": "query required"}}
 
-    selected = sources or ["federal_register"]
+    selected = sources or ["govinfo"]
     results = []
     for src in selected:
         if src == "govinfo":
