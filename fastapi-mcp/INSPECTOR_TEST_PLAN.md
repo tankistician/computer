@@ -3,7 +3,8 @@
 This document contains quick tests you can run with `curl` (or the MCP Inspector) to exercise the example MCP tools in this repo.
 
 Notes
-- The project mounts the MCP ASGI app at `/mcp` when running via `uvicorn app.main:app`.
+- The project mounts the MCP ASGI app at `/mcp` when running.
+- Recommended dev run: from repo root, run `make up` (Docker Compose + reload).
 - FastMCP's HTTP tool call shape varies by implementation; these examples assume a simple HTTP POST to `/mcp/tool` with JSON: `{ "tool": "<name>", "input": { ... } }`.
 - If your FastMCP install exposes a different path/shape, adapt accordingly or use the MCP Inspector UI.
 
@@ -12,8 +13,10 @@ Notes
 
 2) Call `add` tool
 
-```powershell
-curl -X POST "http://127.0.0.1:8000/mcp/tool" -H "Content-Type: application/json" -d '{"tool":"add","input":{"a":2,"b":3}}'
+```bash
+curl -X POST "http://127.0.0.1:8000/mcp/tool" \
+	-H "Content-Type: application/json" \
+	-d '{"tool":"add","input":{"a":2,"b":3}}'
 ```
 
 Expected response (JSON):
@@ -24,7 +27,7 @@ Expected response (JSON):
 
 3) Call `normalize_name` tool
 
-```powershell
+```bash
 curl -X POST "http://127.0.0.1:8000/mcp/tool" -H "Content-Type: application/json" -d '{"tool":"normalize_name","input":{"name":"  alice   o\'connor  "}}'
 ```
 
@@ -34,7 +37,7 @@ Expected response JSON contains `output.data.normalized` with a title-cased stri
 
 Some MCP servers expose resources differently; you can query the resource via the Inspector or by calling the resource endpoint if exposed. Example conceptual call:
 
-```powershell
+```bash
 curl -X GET "http://127.0.0.1:8000/mcp/resource/health://status"
 ```
 
@@ -45,4 +48,4 @@ Expected: `ok` (or a JSON envelope depending on server shape).
 
 Troubleshooting
 - If you get 404s against `/mcp/tool`, inspect the mounted routes or use the Inspector CLI to discover the correct endpoints.
-- Use `uvicorn app.main:app --reload --port 8000` to run the app locally before testing.
+- Use `make up` to run the app before testing.

@@ -1,17 +1,13 @@
-SHELL := powershell.exe
-WORKDIR := fastapi-mcp
-VENV_ACTIVATE := .\$(WORKDIR)\.venv\Scripts\Activate.ps1
-PYTHON := .\$(WORKDIR)\.venv\Scripts\python.exe
+.PHONY: up down logs test
 
-.PHONY: start-server prod-test flask-test
+up:
+	docker compose up --build
 
-start-server:
-	Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned -Force; \
-	cd $(WORKDIR); \
-	.\start-server.ps1
+down:
+	docker compose down
 
-prod-test:
-	Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned -Force; \
-	cd $(WORKDIR); \
-	. $(VENV_ACTIVATE); \
-	$(PYTHON) prod_tests/04_invoke_tool_http.py --query "AI regulation" --limit 3 --summary-count 2
+logs:
+	docker compose logs -f
+
+test:
+	docker compose run --rm fastapi-mcp pytest -q

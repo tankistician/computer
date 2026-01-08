@@ -1,0 +1,15 @@
+services:
+  fastapi-mcp:
+    build:
+      context: ./fastapi-mcp
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./fastapi-mcp:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - GOVINFO_API_KEY=${GOVINFO_API_KEY-}
+      - JIRA_BASE_URL=${JIRA_BASE_URL-}
+      - JIRA_EMAIL=${JIRA_EMAIL-}
+      - JIRA_API_TOKEN=${JIRA_API_TOKEN-}
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000

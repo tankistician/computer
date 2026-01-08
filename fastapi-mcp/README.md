@@ -4,47 +4,21 @@ Minimal FastAPI + FastMCP server scaffold.
 
 Status: skeleton only — tools not yet implemented.
 
-Quick start
+Quick start (Docker, macOS-first)
 
-Prerequisites: Python 3.10+ (3.11 recommended).
+Prerequisites:
+- Docker Desktop
+- `make`
 
-Recommended (foreground, simplest)
+From the repo root:
 
-```powershell
-cd C:\Users\fbpol\Documents\ML_Projects\computer\fastapi-mcp
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned -Force
-py -3.11 -m venv .venv     # or: python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```bash
+make up
 ```
 
-While the server runs (logs in this terminal), open a second terminal for coding/testing:
-
-```powershell
-cd C:\Users\fbpol\Documents\ML_Projects\computer\fastapi-mcp
-.\.venv\Scripts\Activate.ps1
-```
-
-`start-server.ps1` now bootstraps the shared workspace `.venv` (instead of creating a nested one), so always activate that same `.venv` before running the prod test scripts or `pytest` so every helper shares the exact same dependencies.
-
-Scripted helper (same behavior, foreground)
-
-```powershell
-cd C:\Users\fbpol\Documents\ML_Projects\computer\fastapi-mcp
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned -Force
-.\start-server.ps1
-```
-
-Detach option (if you prefer your prompt free):
-
-```powershell
-cd C:\Users\fbpol\Documents\ML_Projects\computer\fastapi-mcp
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned -Force
-$p = Start-Process -FilePath "$PWD\.venv\Scripts\python.exe" -ArgumentList "-m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000" -WorkingDirectory $PWD -PassThru
-$p.Id   # note PID; stop later with: Stop-Process -Id <PID>
-```
+Then open:
+- FastAPI: `http://127.0.0.1:8000/hello`
+- OpenAPI: `http://127.0.0.1:8000/docs`
 
 Endpoints (once running):
 - FastAPI: `GET http://127.0.0.1:8000/hello`
@@ -52,23 +26,21 @@ Endpoints (once running):
 
 Testing & Inspector
 
-- Unit tests (do not require FastMCP):
+- Unit tests (inside Docker):
 
-```powershell
-cd C:\Users\fbpol\Documents\ML_Projects\computer\fastapi-mcp
-pytest -q
+```bash
+make test
 ```
 
 - Inspector (optional):
 
-```powershell
+```bash
 npx @modelcontextprotocol/inspector
 ```
 
 Troubleshooting
 
-- If `python` still points to an older version after installing 3.11, prefer using the `py` launcher (`py -3.11`) or run the `start-server.ps1` script which prefers `py -3.11` automatically.
-- If the MCP endpoints are not present, ensure `fastmcp<3` installed successfully in the venv. The app will still run; MCP-decorated tools appear only when FastMCP is available.
+- If MCP endpoints are not present, ensure `fastmcp<3` is installed in the container image (see `fastapi-mcp/requirements.txt`).
 
 Next steps
 

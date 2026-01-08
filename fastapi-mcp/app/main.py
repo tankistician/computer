@@ -6,12 +6,21 @@ performed only if the MCP app is available.
 """
 from __future__ import annotations
 
-from fastapi import FastAPI
+import asyncio
+from typing import Any
+
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 from . import mcp_server
 
 mcp = getattr(mcp_server, "mcp", None)
 app = FastAPI(title="fastapi-mcp example")
+
+
+class MCPToolCall(BaseModel):
+    tool: str
+    input: dict[str, Any] | None = None
 
 @app.get("/hello")
 def hello() -> dict:
@@ -92,9 +101,29 @@ async def list_mcp_tools():
     # Return the in-process debug info (requested: only inproc_debug)
     return {"source": "inprocess", "mcp_present": mcp is not None, "inproc_debug": inproc_debug}
 
+
+@app.post("/mcp/tool", tags=["mcp"])
+async def call_mcp_tool(payload: MCPToolCall):
+    """Proxy a `{tool, input}` call to the in-process MCP implementation."""
+    func = getattr(mcp_server, payload.tool, None)
+    if func is None:
+        raise HTTPException(status_code=404, detail="tool not found")
+    kwargs = payload.input or {}
+    if not isinstance(kwargs, dict):
+        raise HTTPException(status_code=400, detail="input must be an object")
+    target = getattr(func, "fn", func)
+    if not callable(target):
+        raise HTTPException(status_code=404, detail="tool not found")
+    if asyncio.iscoroutinefunction(target):
+        result = await target(**kwargs)
+    else:
+        result = target(**kwargs)
+    return result
+
+
 if mcp is not None:
     try:
-        mcp_app = mcp.http_app(path="/mcp")
+        mcp_app = mcp.http_app()
         # Pass MCP lifespan to FastAPI so MCP session lifecycle runs correctly
         app.mount("/mcp", mcp_app)
     except Exception:

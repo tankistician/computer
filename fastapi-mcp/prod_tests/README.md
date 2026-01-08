@@ -15,7 +15,7 @@ Overview
 - `03_invoke_tool_inproc.py` — call the tool implementation in-process (no server).
 - `04_invoke_tool_http.py` — call the tool via the MCP HTTP interface (requires server running).
 - `05_pytest_template.md` — a template for converting a manual smoke check into an automated pytest integration.
-- `run_all.ps1` — PowerShell orchestrator to run the smoke checks (manual use).
+
 
 Process (recommended)
 1. Query the upstream source directly to confirm expected raw results and payload shape.
@@ -29,7 +29,6 @@ Policy search + summary flow
 
 Environment notes
 - Scripts assume you have a Python venv activated and `PYTHONPATH` set to the `fastapi-mcp` package for in-process calls.
-- The prod scripts now auto-load the repo `.env` (if present at `..\.env`) so `GOVINFO_API_KEY` is exported before calling GovInfo.
-- For PowerShell scripts, load environment variables from the project `.env` if present.
+- The prod scripts may auto-load the repo `.env` (if present at `../.env`) so `GOVINFO_API_KEY` is exported before calling GovInfo.
 
 See the individual scripts for usage examples.

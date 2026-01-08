@@ -17,7 +17,7 @@ app/                       # application-level agents, graph definitions, tools,
 docs/                      # role + workflow docs, manifests, architecture notes
 docs/agents/README.md      # entry point for all agent playbooks
 fastapi-mcp/               # FastAPI + FastMCP server implementation + tool definitions
-prod_tests/                # PowerShell/python checks and templates for production verification
+prod_tests/                # Python checks and templates for production verification
 scripts/                   # convenience scripts (tool invocations, integrations)
 tests/                     # unit tests for published tools
 README.md                  # this guide
@@ -28,7 +28,7 @@ payload.json              # payload helper used by govinfo call (existing toolin
 1. **Read `agent_instruction.md` first**—it is the merged AI rules file every contributor/agent should follow before making edits.
 2. **Use the `docs/agents/` playbooks** when creating agents or tools; the manifests reference these policies for planner/executor/reviewer/finalizer nodes.
 3. **For FastAPI/FastMCP work**, the `fastapi-mcp/` directory contains the running server, dependencies list, and sample `uvicorn` run command (refer to its README).
-4. **Run the FastAPI + MCP stack locally** via `uvicorn app.main:app --reload --host 127.0.0.1 --port 8000` and then exercise `/hello` (REST) and `/mcp` (MCP) endpoints as described in the docs.
+4. **Run the FastAPI + MCP stack locally** via `make up` (Docker Compose) and then exercise `/hello` (REST) and `/mcp` (MCP) endpoints as described in the docs.
 5. **Use the MCP Inspector** (`npx @modelcontextprotocol/inspector <command>`) to verify tools/resources/prompts and capture valid/invalid call plans.
 
 ## Testing & Contributions
